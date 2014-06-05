@@ -26,12 +26,13 @@ import exception.UpdateException;
 
 
 public class BuildFile {
-	private static final String LOCATION = "location";
+	private static final String NodeName = "pathelement";
+	private static final String AttributeName = "location";
 	private static final String PREFIX = "${ECLIPSE_HOME}/plugins/";
 	private static final String PATH = "@@P";
 	private static final String ERROR = "@@E";
 	private Path path;
-	private Map<String, String> id2name;	//map from this XML file
+	private Map<String, String> id2name = new HashMap<>();	//map from this XML file
 	private Map<String, String> newId2name;	//map from the new plugin folder
 	private Document XMLDocument;
 	
@@ -51,7 +52,7 @@ public class BuildFile {
 		NodeList nodeList = getLocationNodeList();
 		for (int i = 0; i < nodeList.getLength(); ++i) {
 			Element element = (Element)nodeList.item(i);
-			String location = element.getAttribute(LOCATION);
+			String location = element.getAttribute(AttributeName);
 			if (!location.startsWith(PREFIX)) continue;
 			location = location.substring(PREFIX.length());
 			if (isInvalidLocation(location)) 
@@ -73,6 +74,12 @@ public class BuildFile {
 	public void update() {
 		updateMap(newId2name, id2name);
 		saveToFile();
+	}
+	
+	public void validate() {
+		Map<String, String> temp1 = new HashMap<>(newId2name);
+		Map<String, String> temp2 = new HashMap<>(id2name);
+		updateMap(temp1, temp2);
 	}
 	
 	public List<String> getCompareResults() {
@@ -123,11 +130,11 @@ public class BuildFile {
 		NodeList nodeList = getLocationNodeList();  
 		for (int i = 0; i < nodeList.getLength(); ++i) {
 			Element element = (Element)nodeList.item(i);
-			String location = element.getAttribute(LOCATION);
+			String location = element.getAttribute(AttributeName);
 			if (!location.startsWith(PREFIX)) continue;
 			location = location.substring(PREFIX.length());
 			PluginName pluginName = new PluginName(location);
-			element.getAttributeNode(LOCATION).setValue(id2name.get(pluginName.getPluginNameWithoutVersionNumber()));
+			element.getAttributeNode(AttributeName).setValue(PREFIX + id2name.get(pluginName.getPluginNameWithoutVersionNumber()));
 		}
 	}
 
@@ -141,7 +148,7 @@ public class BuildFile {
 	}
 
 	private NodeList getLocationNodeList() {
-		return XMLDocument.getElementsByTagName("pathelement");
+		return XMLDocument.getElementsByTagName(NodeName);
 	}
 
 	private boolean isInvalidLocation(String location) {

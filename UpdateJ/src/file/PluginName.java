@@ -15,7 +15,7 @@ public class PluginName {
 		String nameWithoutVersionNumber;
 		if (name.contains("/")) {
 			nameWithoutVersionNumber = name.substring(0, name.indexOf('_')) +
-					name.substring(name.indexOf('/') + 1);
+					name.substring(name.indexOf('/'));
 		} else {
 			nameWithoutVersionNumber = name.substring(0, name.indexOf('_')) + ".jar";
 		}
