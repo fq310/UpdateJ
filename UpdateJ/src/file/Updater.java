@@ -47,17 +47,23 @@ public class Updater implements IDataReceiver {
 	@Override
 	public void execute(String data) {
 		response.clear();
-		String[] commands = data.split("|");
-		for (String command : commands) {
-			String[] values = command.split(":");
-			String operation = values[0];
-			if (operation.equals("validate")) {
-				validate(values[1], values[2], values[3]);
-				response.add("validate " + values[3] + "successful.");
-			} 
-			if (operation.equals("update")) {
-				update();
+		try {
+			String[] commands = data.split("\\|");
+			for (String command : commands) {
+				String[] values = command.split(":");
+				String operation = values[0];
+				if (operation.equals("validate")) {
+					validate(values[1], values[2], values[3]);
+					response.add("validate " + values[3] + " successful.");
+				} 
+				if (operation.equals("update")) {
+					validate(values[1], values[2], values[3]);
+					update();
+				}
 			}
+		} catch (Exception e) {
+			response.add("Exception occurred.");
+			response.add(e.getMessage());
 		}
 	}
 
@@ -65,7 +71,7 @@ public class Updater implements IDataReceiver {
 	public String getResponse() {
 		StringBuilder result = new StringBuilder();
 		for (String str : response) {
-			result.append(str).append("|");
+			result.append(str).append("\n");
 		}
 		return result.toString();
 	}

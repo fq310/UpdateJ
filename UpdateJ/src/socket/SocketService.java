@@ -1,23 +1,21 @@
 package socket;
 
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class SocketService {
-	private ExecutorService threadPool = Executors.newFixedThreadPool(3);
-	public void start(IDataReceiver job) {
-		BlockingQueue<String> input = new LinkedBlockingQueue<>();
-		BlockingQueue<String> output = new LinkedBlockingQueue<>();
+	public void start(IDataReceiver receiver) {
+		JWebSocketServer socketServer = new JWebSocketServer(8080, receiver);
 		try {
-			JSocket socket = new JSocket(9527);
-			threadPool.execute(new InputThread(input, socket));
-			threadPool.execute(new OutputThread(output, socket));
-			threadPool.execute(new LocalThread(input, output, job));
+			socketServer.start();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}		
+		}
+		System.out.println("Server started, hit Enter to stop.\n");
+        try {
+            System.in.read();
+        } catch (IOException ignored) {
+        }
+        socketServer.stop();
+        System.out.println("Server stopped.\n");
 	}
 }
