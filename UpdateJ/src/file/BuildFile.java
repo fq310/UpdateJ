@@ -1,9 +1,7 @@
 package file;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -29,8 +27,6 @@ public class BuildFile {
 	private static final String NodeName = "pathelement";
 	private static final String AttributeName = "location";
 	private static final String PREFIX = "${ECLIPSE_HOME}/plugins/";
-	private static final String PATH = "@@P";
-	private static final String ERROR = "@@E";
 	private Path path;
 	private Map<String, String> id2name = new HashMap<>();	//map from this XML file
 	private Map<String, String> newId2name;	//map from the new plugin folder
@@ -82,21 +78,6 @@ public class BuildFile {
 		updateMap(temp1, temp2);
 	}
 	
-	public List<String> getCompareResults() {
-		List<String> result = new ArrayList<>();
-		result.add(PATH + "File: " + path);
-		for (Entry<String, String> entry : id2name.entrySet()) {
-			String id = entry.getKey();
-			String newLocation = newId2name.get(id);
-			if (newLocation == null) {
-				result.add(ERROR + " Valide File failed. Cannot find plugin in new plugin folder, name: " + id + 
-						"full location: " + entry.getKey() + ". From file: " + path);
-			} else {
-				result.add(id + " ----> " + newLocation); }
-		}
-		return result;
-	}
-	
 	public String getFileName() {
 		return path.toString();
 	}
@@ -107,13 +88,19 @@ public class BuildFile {
 			String id = entry.getKey();
 			String newLocation = newId2name.get(id);
 			if (newLocation == null) {
-				throw new UpdateException("Parse build file failed. Cannot find plugin in new plugin folder, name: " + id + 
-						"full location: " + entry.getKey() + ". From file: " + path);
+				String errrorMessage = getErrorMessage(id);
+				throw new UpdateException(errrorMessage);
 			} else {
 				tempMap.put(id, newLocation); }
 		}
 		oldId2name.clear();
 		oldId2name.putAll(tempMap);
+	}
+
+	private String getErrorMessage(String id) {
+		String errrorMessage = "Parse build file failed. Cannot find jar file in the plugin path folder, name: " + id + 
+			 ". From file: " + path;
+		return errrorMessage;
 	}
 
 	private void saveToFile() {

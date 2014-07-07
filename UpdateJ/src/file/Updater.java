@@ -50,28 +50,42 @@ public class Updater implements IDataReceiver {
 		try {
 			String[] commands = data.split("\\|");
 			for (String command : commands) {
-				String[] values = command.split(":");
+				if (command.length() == 0) continue;
+				String[] values = command.split("\\?");
+				if (values.length != 4) continue;
 				String operation = values[0];
+				String pluginFolder = values[1];
+				String sourceFolder = values[2];
+				String buildFile = values[3];
+				if (invalidPath(pluginFolder, sourceFolder, buildFile)) continue;
 				if (operation.equals("validate")) {
-					validate(values[1], values[2], values[3]);
-					response.add("validate " + values[3] + " successful.");
+					validate(pluginFolder, sourceFolder, buildFile);
+					response.add("validate " + buildFile + " successful.");
 				} 
 				if (operation.equals("update")) {
-					validate(values[1], values[2], values[3]);
+					validate(pluginFolder, sourceFolder, buildFile);
 					update();
 				}
 			}
 		} catch (Exception e) {
-			response.add("Exception occurred.");
+			response.add("@Exception occurred.");
 			response.add(e.getMessage());
 		}
+	}
+
+	private boolean invalidPath(String pluginFolder, String sourceFolder,
+			String buildFile) {
+		if (pluginFolder == null || sourceFolder == null || buildFile == null ||
+				pluginFolder.length() == 0 || sourceFolder.length() == 0 || sourceFolder.length() == 0)
+			return true;
+		return false;
 	}
 
 	@Override
 	public String getResponse() {
 		StringBuilder result = new StringBuilder();
 		for (String str : response) {
-			result.append(str).append("\n");
+			result.append(str).append(" ");
 		}
 		return result.toString();
 	}
